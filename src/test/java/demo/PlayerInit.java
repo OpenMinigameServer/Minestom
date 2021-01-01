@@ -90,7 +90,7 @@ public class PlayerInit {
             final ColoredText header = ColoredText.of("RAM USAGE: " + ramUsage + " MB");
             final ColoredText footer = ColoredText.of(benchmarkManager.getCpuMonitoringMessage());
 
-            {
+            if (false) {
                 PlayerListHeaderAndFooterPacket playerListHeaderAndFooterPacket = new PlayerListHeaderAndFooterPacket();
                 playerListHeaderAndFooterPacket.header = header;
                 playerListHeaderAndFooterPacket.footer = footer;

@@ -52,9 +52,7 @@ public final class PacketProcessor {
 
     public void process(@NotNull ChannelHandlerContext channel, @NotNull InboundPacket packet) {
         // Create the netty player connection object if not existing
-        PlayerConnection playerConnection = connectionPlayerConnectionMap.computeIfAbsent(
-                channel, c -> new NettyPlayerConnection((SocketChannel) channel.channel())
-        );
+        PlayerConnection playerConnection = getOrCreatePlayerConnection(channel);
 
         if (MinecraftServer.getRateLimit() > 0)
             playerConnection.getPacketCounter().incrementAndGet();
@@ -102,6 +100,19 @@ public final class PacketProcessor {
     @Nullable
     public PlayerConnection getPlayerConnection(ChannelHandlerContext channel) {
         return connectionPlayerConnectionMap.get(channel);
+    }
+    /**
+     * Retrieves a player connection from its channel.
+     *
+     * @param channel the connection channel
+     * @return the connection of this channel, null if not found
+     */
+    @NotNull
+    public PlayerConnection getOrCreatePlayerConnection(ChannelHandlerContext channel) {
+        // Create the netty player connection object if not existing
+            return connectionPlayerConnectionMap.computeIfAbsent(
+                channel, c -> new NettyPlayerConnection((SocketChannel) channel.channel())
+        );
     }
 
     public void removePlayerConnection(@NotNull ChannelHandlerContext channel) {

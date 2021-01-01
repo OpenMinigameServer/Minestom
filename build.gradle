@@ -117,7 +117,7 @@ dependencies {
     api 'io.netty.incubator:netty-incubator-transport-native-io_uring:0.0.2.Final:linux-x86_64'
 
     // https://mvnrepository.com/artifact/it.unimi.dsi/fastutil
-    api 'it.unimi.dsi:fastutil:8.4.4'
+    api 'it.unimi.dsi:fastutil:8.3.1'
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     api 'com.google.code.gson:gson:2.8.6'
@@ -164,6 +164,12 @@ dependencies {
 
     api('net.kyori:adventure-api:4.3.0')
     api('net.kyori:adventure-text-serializer-gson:4.3.0')
+
+    //ViaVersion
+    api('org.yaml:snakeyaml:1.26')
+    implementation('com.github.ViaVersion.ViaVersion:viaversion:127cae80bd')
+    implementation('com.github.ViaVersion.ViaBackwards:viabackwards-core:673239108c')
+    implementation('com.github.steveice10:opennbt:d50274d')
 
     // LWJGL, for map rendering
     lwjglApi platform("org.lwjgl:lwjgl-bom:$lwjglVersion")

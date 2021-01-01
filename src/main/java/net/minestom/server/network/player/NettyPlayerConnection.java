@@ -19,14 +19,20 @@ import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.cache.CacheablePacket;
 import net.minestom.server.utils.cache.TemporaryCache;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.via.MinestomViaInjector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import us.myles.ViaVersion.api.data.UserConnection;
+import us.myles.ViaVersion.packets.State;
 
 import javax.crypto.SecretKey;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static net.minestom.server.network.netty.NettyServer.DECODER_HANDLER_NAME;
+import static net.minestom.server.network.netty.NettyServer.ENCODER_HANDLER_NAME;
 
 /**
  * Represents a networking connection with Netty.
@@ -40,21 +46,22 @@ public class NettyPlayerConnection extends PlayerConnection {
     private SocketAddress remoteAddress;
 
     private boolean encrypted = false;
+
     private boolean compressed = false;
-
     //Could be null. Only used for Mojang Auth
-    private byte[] nonce = new byte[4];
 
+    private byte[] nonce = new byte[4];
     // Data from client packets
+
     private String loginUsername;
     private String serverAddress;
     private int serverPort;
-
     // Used for the login plugin request packet, to retrieve the channel from a message id,
     // cleared once the player enters the play state
-    private final Map<Integer, String> pluginRequestMap = new ConcurrentHashMap<>();
 
+    private final Map<Integer, String> pluginRequestMap = new ConcurrentHashMap<>();
     // Bungee
+
     private UUID bungeeUuid;
     private PlayerSkin bungeeSkin;
 
@@ -129,7 +136,7 @@ public class NettyPlayerConnection extends PlayerConnection {
                         if (buffer == null) {
                             // Buffer not found, create and cache it
                             final long time = System.currentTimeMillis();
-                            buffer = PacketUtils.createFramedPacket(serverPacket, false);
+                            buffer = PacketUtils.createFramedPacket(serverPacket, false, channel.attr(MinestomViaInjector.getUserConnectionAttribute()).get());
                             temporaryCache.cacheObject(identifier, buffer, time);
                         }
                         FramedPacket framedPacket = new FramedPacket(buffer);
@@ -295,6 +302,7 @@ public class NettyPlayerConnection extends PlayerConnection {
     @Override
     public void setConnectionState(@NotNull ConnectionState connectionState) {
         super.setConnectionState(connectionState);
+
         // Clear the plugin request map (since it is not used anymore)
         if (connectionState.equals(ConnectionState.PLAY)) {
             this.pluginRequestMap.clear();

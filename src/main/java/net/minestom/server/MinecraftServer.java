@@ -47,13 +47,19 @@ import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.cache.TemporaryCache;
 import net.minestom.server.utils.thread.MinestomThread;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.via.*;
 import net.minestom.server.world.Difficulty;
 import net.minestom.server.world.DimensionTypeManager;
 import net.minestom.server.world.biomes.BiomeManager;
+import nl.matsv.viabackwards.ViaBackwards;
+import nl.matsv.viabackwards.api.BackwardsProtocol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import us.myles.ViaVersion.ViaManager;
+import us.myles.ViaVersion.api.Via;
+import us.myles.ViaVersion.api.protocol.ProtocolRegistry;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -182,6 +188,17 @@ public final class MinecraftServer {
 
         lootTableManager = new LootTableManager();
         tagManager = new TagManager();
+
+        //ViaVersion
+        MinestomViaPlatform platform = new MinestomViaPlatform();
+        Via.init(ViaManager.builder()
+                .injector(new MinestomViaInjector())
+                .loader(new MinestomViaLoader())
+                .platform(platform).build());
+        platform.setEnabled(true);
+        Via.getManager().init();
+        ViaBackwards.init(new MinestomViaBackwardsPlatform(), new MinestomViaBackwardsConfig());
+        ViaBackwards.getPlatform().init(ViaBackwards.getPlatform().getDataFolder());
 
         nettyServer = new NettyServer(packetProcessor);
 

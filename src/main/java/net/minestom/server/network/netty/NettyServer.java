@@ -22,12 +22,17 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.PacketProcessor;
 import net.minestom.server.network.netty.channel.ClientChannel;
 import net.minestom.server.network.netty.codec.*;
+import net.minestom.server.network.player.NettyPlayerConnection;
 import net.minestom.server.ping.ResponseDataConsumer;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.via.MinestomViaInjector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import us.myles.ViaVersion.api.data.UserConnection;
+import us.myles.ViaVersion.api.protocol.ProtocolPipeline;
+import us.myles.ViaVersion.protocols.base.ProtocolInfo;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -164,6 +169,10 @@ public final class NettyServer {
 
                 ChannelPipeline pipeline = ch.pipeline();
 
+                UserConnection user = new UserConnection(ch);
+                new ProtocolPipeline(user);
+                ch.attr(MinestomViaInjector.getUserConnectionAttribute()).set(user);
+
                 pipeline.addLast(TRAFFIC_LIMITER_HANDLER_NAME, globalTrafficHandler);
 
                 // First check should verify if the packet is a legacy ping (from 1.6 version and earlier)
@@ -171,18 +180,19 @@ public final class NettyServer {
                 pipeline.addLast(LEGACY_PING_HANDLER_NAME, new LegacyPingHandler());
 
                 // Used to bypass all the previous handlers by directly sending a framed buffer
-                pipeline.addLast(GROUPED_PACKET_HANDLER_NAME, new GroupedPacketHandler());
+                pipeline.addLast(GROUPED_PACKET_HANDLER_NAME, new GroupedPacketHandler(user));
 
                 // Adds packetLength at start | Reads framed buffer
                 pipeline.addLast(FRAMER_HANDLER_NAME, new PacketFramer(packetProcessor));
 
                 // Reads buffer and create inbound packet
-                pipeline.addLast(DECODER_HANDLER_NAME, new PacketDecoder());
+                pipeline.addLast(DECODER_HANDLER_NAME, new PacketDecoder(user));
 
                 // Writes packet to buffer
-                pipeline.addLast(ENCODER_HANDLER_NAME, new PacketEncoder());
+                pipeline.addLast(ENCODER_HANDLER_NAME, new PacketEncoder(user));
 
                 pipeline.addLast(CLIENT_CHANNEL_NAME, new ClientChannel(packetProcessor));
+
             }
         });
     }

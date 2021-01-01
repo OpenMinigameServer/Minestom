@@ -14,6 +14,8 @@ import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.server.utils.callback.validator.PlayerValidator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import us.myles.ViaVersion.api.data.UserConnection;
+import us.myles.ViaVersion.exception.CancelDecoderException;
 
 import java.util.Collection;
 import java.util.zip.Deflater;
@@ -49,8 +51,8 @@ public final class PacketUtils {
 
         final boolean success = PACKET_LISTENER_MANAGER.processServerPacket(packet, players);
         if (success) {
-            final ByteBuf finalBuffer = createFramedPacket(packet, false);
-            final FramedPacket framedPacket = new FramedPacket(finalBuffer);
+           // final ByteBuf finalBuffer = createFramedPacket(packet, false);
+            //final FramedPacket framedPacket = new FramedPacket(finalBuffer);
 
             // Send packet to all players
             for (Player player : players) {
@@ -60,12 +62,7 @@ public final class PacketUtils {
                     continue;
 
                 final PlayerConnection playerConnection = player.getPlayerConnection();
-                if (playerConnection instanceof NettyPlayerConnection) {
-                    final NettyPlayerConnection nettyPlayerConnection = (NettyPlayerConnection) playerConnection;
-                    nettyPlayerConnection.write(framedPacket);
-                } else {
-                    playerConnection.sendPacket(packet);
-                }
+                playerConnection.sendPacket(packet);
             }
         }
     }
@@ -210,11 +207,18 @@ public final class PacketUtils {
      * Compression is applied if {@link MinecraftServer#getCompressionThreshold()} is greater than 0.
      *
      * @param serverPacket the server packet to write
+     * @param viaConnection
      * @return the framed packet from the server one
      */
     @NotNull
-    public static ByteBuf createFramedPacket(@NotNull ServerPacket serverPacket, boolean directBuffer) {
+    public static ByteBuf createFramedPacket(@NotNull ServerPacket serverPacket, boolean directBuffer,
+                                             UserConnection viaConnection) {
         ByteBuf packetBuf = writePacket(serverPacket);
+        try {
+            viaConnection.transformOutgoing(packetBuf, CancelDecoderException::new);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (MinecraftServer.getCompressionThreshold() > 0) {
 
