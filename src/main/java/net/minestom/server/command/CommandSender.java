@@ -1,5 +1,7 @@
 package net.minestom.server.command;
 
+import net.kyori.adventure.text.ComponentLike;
+import net.minestom.server.chat.AdventureMessage;
 import net.minestom.server.chat.ColoredText;
 import net.minestom.server.chat.JsonMessage;
 import net.minestom.server.entity.Player;
@@ -29,6 +31,16 @@ public interface CommandSender extends PermissionHandler {
         for (String message : messages) {
             sendMessage(message);
         }
+    }
+
+    /**
+     * Sends a {@link ComponentLike} message.
+     * If this is not a {@link Player}, only the content of the message will be sent as a string.
+     *
+     * @param text The {@link ComponentLike} to send.
+     * */
+    default void sendMessage(@NotNull ComponentLike text) {
+        sendMessage(new AdventureMessage(text));
     }
 
     /**

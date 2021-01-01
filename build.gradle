@@ -39,6 +39,10 @@ allprojects {
             name 'sponge'
             url 'https://repo.spongepowered.org/maven'
         }
+        maven {
+            name 'sonatype-oss'
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
     }
     javadoc {
         options {
@@ -157,6 +161,9 @@ dependencies {
     }
 
     implementation "com.github.Minestom:DependencyGetter:v1.0.1"
+
+    api('net.kyori:adventure-api:4.3.0')
+    api('net.kyori:adventure-text-serializer-gson:4.3.0')
 
     // LWJGL, for map rendering
     lwjglApi platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
